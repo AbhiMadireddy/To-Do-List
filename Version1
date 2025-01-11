@@ -1,0 +1,125 @@
+'''
+Implemented with a text file to store tasks and other information
+'''
+
+TASK_FILE = 'tasks.txt'
+
+# Define color codes
+RED = '\033[31m'
+GREEN = '\033[32m'
+ORANGE = '\033[33m'
+RESET = '\033[0m'
+
+import random
+
+def get_tasks():
+    tasks = []
+    try:
+        with open(TASK_FILE, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line:
+                    task = line.split('|')
+                    tasks.append(task)
+    except FileNotFoundError:
+        pass  # If the file does not exist, just return an empty list
+    return tasks
+
+def save_tasks(tasks):
+    with open(TASK_FILE, 'w') as file:
+        for task in tasks:
+            file.write('|'.join(task) + '\n')
+
+def add_task():
+    task = input("Enter the task you want to add: ")
+    due_date = input("Should be done by... ")
+    if not task or not due_date:
+        print("Task and due date cannot be empty.")
+        return
+    tasks = get_tasks()
+    task_id = str(len(tasks) + 1)  # Simple ID assignment
+    tasks.append([task_id, task, "Get a move on it", due_date])
+    save_tasks(tasks)
+    print("Task added successfully!")
+
+def remove_task():
+    list_tasks()
+    try:
+        task_id = input("Which one are you done with: ")
+        tasks = get_tasks()
+        tasks = [task for task in tasks if task[0] != task_id]
+        save_tasks(tasks)
+        print("Task removed successfully!")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+def update_task_status():
+    list_tasks()
+    try:
+        task_id = input("Which one you done with: ")
+        tasks = get_tasks()
+        for task in tasks:
+            if task[0] == task_id:
+                task[2] = "Done"
+                break
+        else:
+            print("Task ID not found.")
+            return
+        save_tasks(tasks)
+        print("Task status updated successfully!")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+def list_tasks():
+    tasks = get_tasks()
+    if not tasks:
+        print("Nothing found. Working hard or hardly working?")
+        return
+    print("\nTask ID | Task | Status | Due Date")
+    print("------------------------------------")
+    for task in tasks:
+        # Apply colors based on task status
+        status_color = GREEN if task[2] == "Done" else RED
+        print(f"{ORANGE}{task[0]} | {task[1]} | {status_color}{task[2]}{RESET} | {task[3]}{RESET}")
+    print()
+
+
+def goodbye_message():
+    messages = [
+        "I will be back (Arnold Voice).",
+        "Hasta la vista, baby!",
+        "In case I don't see ya, good afternoon, good evening, and good night!",
+        "Yippie-ky-yay",
+        "I had to go see about a girl."
+    ]
+    print(random.choice(messages))
+
+
+def main():
+    while True:
+        print("\nMenu:")
+        print("A - Add Task")
+        print("R - Remove Task")
+        print("V - View Tasks")
+        print("U - Update Task Status")
+        print("Q - Quit")
+
+        choice = input("Choose an option: ").upper()
+
+        if choice == 'A':
+            add_task()
+        elif choice == 'R':
+            remove_task()
+        elif choice == 'V':
+            list_tasks()
+        elif choice == 'U':
+            update_task_status()
+        elif choice == 'Q':
+            goodbye_message()
+
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == '__main__':
+    main()
