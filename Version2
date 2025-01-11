@@ -1,0 +1,102 @@
+'''
+Implemented with TinyDB
+'''
+
+
+from tinydb import TinyDB, Query
+import random
+
+# Define color codes
+RED = '\033[31m'
+GREEN = '\033[32m'
+ORANGE = '\033[33m'
+RESET = '\033[0m'
+
+# Initialize TinyDB database
+DB_FILE = 'tasks.json'
+db = TinyDB(DB_FILE)
+Task = Query()
+
+def add_task():
+    task = input("Enter the task you want to add: ")
+    due_date = input("Should be done by... ")
+    if not task or not due_date:
+        print("Task and due date cannot be empty.")
+        return
+    task_id = len(db) + 1  # Simple ID assignment
+    db.insert({'id': task_id, 'task': task, 'status': 'Get a move on it', 'due_date': due_date})
+    print("Task added successfully!")
+
+def remove_task():
+    list_tasks()
+    try:
+        task_id = int(input("Which one are you done with (enter ID): "))
+        db.remove(Task.id == task_id)
+        print("Task removed successfully!")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+def update_task_status():
+    list_tasks()
+    try:
+        task_id = int(input("Which one you done with (enter ID): "))
+        task = db.search(Task.id == task_id)
+        if task:
+            db.update({'status': 'Done'}, Task.id == task_id)
+            print("Task status updated successfully!")
+        else:
+            print("Take a nap, mate, you're hallucinating.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+def list_tasks():
+    tasks = db.all()
+    if not tasks:
+        print("Nothing found. Working hard or hardly working?")
+        return
+    print("\nTask ID | Task | Status | Due Date")
+    print("------------------------------------")
+    for task in tasks:
+        # Apply colors based on task status
+        status_color = GREEN if task['status'] == "Done" else RED
+        print(f"{ORANGE}{task['id']} | {task['task']} | {status_color}{task['status']}{RESET} | {task['due_date']}{RESET}")
+    print()
+
+def goodbye_message():
+    messages = [
+        "I will be back (Arnold Voice).",
+        "Hasta la vista, baby!",
+        "In case I don't see ya, good afternoon, good evening, and good night!",
+        "Yippie-ky-yay, motherfucker",
+        "I had to go see about a girl.",
+        "You stay classy, San Diego"
+    ]
+    print(random.choice(messages))
+
+def main():
+    while True:
+        print("\nMenu:")
+        print("A - Add Task")
+        print("R - Remove Task")
+        print("V - View Tasks")
+        print("U - Update Task Status")
+        print("Q - Quit")
+
+        choice = input("Choose an option: ").upper()
+
+        if choice == 'A':
+            add_task()
+        elif choice == 'R':
+            remove_task()
+        elif choice == 'V':
+            list_tasks()
+        elif choice == 'U':
+            update_task_status()
+        elif choice == 'Q':
+            goodbye_message()
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == '__main__':
+    main()
